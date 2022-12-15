@@ -7,8 +7,8 @@ class Cliente(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     nome = db.Column(db.String(), nullable=False)
     cpf = db.Column(db.Integer, nullable=False, unique=True)
-    dtNascimento = db.Column(db.Date, nullable=False)
-    ativo = db.Column(db.Bool, nullable=False)
+    dtNascimento = db.Column(db.DateTime, nullable=False)
+    ativo = db.Column(db.Boolean, nullable=False)
 
     def _init_(self, id, nome, cpf, dtNascimento, ativo) -> None:
         self.id = id
