@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from app import db
 
 
@@ -8,14 +10,16 @@ class Cliente(db.Model):
     nome = db.Column(db.String(), nullable=False)
     cpf = db.Column(db.Integer, nullable=False, unique=True)
     dtNascimento = db.Column(db.DateTime, nullable=False)
+    creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
     ativo = db.Column(db.Boolean, nullable=False)
 
-    def _init_(self, id, nome, cpf, dtNascimento, ativo) -> None:
+    def _init_(self, id, nome, cpf, dtNascimento, ativo):
         self.id = id
         self.nome = nome
         self.cpf = cpf
-        self.dtNascimento = (dtNascimento,)
-        self.ativo
+        self.dtNascimento = dtNascimento
+        self.ativo = ativo
 
     def _repr_(self):
         return f"id {self.id} nome {self.nome} cpf {self.cpf}"
