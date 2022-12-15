@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from flask_restful import abort
 from flask_restful import fields
 from flask_restful import marshal
 from flask_restful import marshal_with
@@ -15,7 +14,6 @@ produto_fields = {
 }
 
 
-
 produto_post_parser = reqparse.RequestParser()
 produto_post_parser.add_argument(
     "nome",
@@ -25,11 +23,15 @@ produto_post_parser.add_argument(
     help="O parâmetro nome é obrigatório",
 )
 
+
 class ProdutosResource(Resource):
     def get(self, id=None):
         if id:
             prod = Produto.query.filter_by(id=id).first()
-            return marshal(prod, produto_fields)
+            if prod:
+                return marshal(prod, produto_fields)
+            else:
+                abort(404)
 
     @marshal_with(produto_fields)
     def post(self):
@@ -41,6 +43,3 @@ class ProdutosResource(Resource):
         db.session.commit()
 
         return prod
-
-
-        

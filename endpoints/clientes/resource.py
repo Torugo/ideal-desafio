@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from flask_restful import abort
 from flask_restful import fields
 from flask_restful import marshal
 from flask_restful import marshal_with
@@ -45,7 +46,10 @@ class ClientsResource(Resource):
     def get(self, id=None):
         if id:
             user = Cliente.query.filter_by(id=id).first()
-            return marshal(user, user_fields)
+            if user:
+                return marshal(user, user_fields)
+            else:
+                abort(404)
 
     @marshal_with(user_fields)
     def post(self):

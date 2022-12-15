@@ -4,14 +4,13 @@ from app import db
 
 
 class Cliente(db.Model):
-    _tablename_ = "tbl_clients"
+    _tablename_ = "tbl_clientes"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     nome = db.Column(db.String(), nullable=False)
     cpf = db.Column(db.Integer, nullable=False, unique=True)
     dtNascimento = db.Column(db.DateTime, nullable=False)
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
     ativo = db.Column(db.Boolean, nullable=False)
 
     def _init_(self, id, nome, cpf, dtNascimento, ativo):
