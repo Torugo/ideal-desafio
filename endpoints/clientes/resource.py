@@ -6,6 +6,7 @@ from flask_restful import marshal
 from flask_restful import marshal_with
 from flask_restful import reqparse
 from flask_restful import Resource
+from sqlalchemy.exc import ProgrammingError
 
 from .model import Cliente
 from app import db
@@ -15,6 +16,8 @@ user_fields = {
     "nome": fields.String,
     "cpf": fields.String,
     "dtNascimento": fields.DateTime,
+    "ativo": fields.Boolean,
+    "data_criacao": fields.DateTime,
 }
 
 
@@ -44,18 +47,108 @@ user_post_parser.add_argument(
 
 class ClientsResource(Resource):
     def get(self, id=None):
-        if id:
-            user = Cliente.query.filter_by(id=id).first()
-            if user:
-                return marshal(user, user_fields)
-            else:
-                abort(404)
+        """
+        Retorna um dado cliente quando fornecido seu cliente_id 
+        ---
+        tags:
+          - Clientes
+        parameters:
+          - in: path
+            name: user_id
+            required: true
+            description: The ID of the task, try 42!
+            type: string
+        responses:
+          200:
+            description: Informação do Cliente
+            schema:
+              id: id
+              properties:
+                id:
+                  type: string
+                  default: None
+                nome:
+                  type: string
+                  default: None
+                cpf:
+                    type: int
+                    default: None
+                dtNascimento:
+                    type: Date
+                    default: None
+                ativo:
+                    type: Bool
+                    default: None
+                data_criacao:
+                    type: Date
+                    default: None
+        """
+        try:
+            if id:
+                user = Cliente.query.filter_by(id=id).first()
+                if user:
+                    return marshal(user, user_fields)
+                else:
+                    abort(404, message="Usuário não encontrado")
+        except ProgrammingError:
+            abort(500, message="Erro interno")
 
     @marshal_with(user_fields)
     def post(self):
+        """
+        Cadastra um novo cliente
+        ---
+        tags:
+          - Clientes
+        parameters:
+          - in: body
+            name: body
+            schema:
+              id: cliente
+              properties:
+                nome: 
+                  type: string
+                  default: Stevie Harris
+                cpf:
+                    type: int
+                    default: 111111111111
+                dtNascimento:
+                    type: Date
+                    default: 10/10/10
+        responses:
+          200:
+            description: Informação do Cliente
+            schema:
+              id: cliente
+              properties:
+                id:
+                  type: string
+                  default: 1
+                nome:
+                  type: string
+                  default: Stevie Harris
+                cpf:
+                    type: int
+                    default: 111111111111
+                dtNascimento:
+                    type: Date
+                    default: 10/10/10
+                ativo:
+                    type: Bool
+                    default: True
+                data_criacao:
+                    type: Date
+                    default: 16/12/2022 12:07
+        """
         args = user_post_parser.parse_args()
+        cpf = int(args['cpf'])
+
+        user = Cliente.query.filter_by(cpf=cpf).first()
+        if user:
+            abort(400, message= "CPF já cadastrado")
         args["ativo"] = True
         args["dtNascimento"] = datetime.strptime(args["dtNascimento"], "%d/%m/%y")
+        
         user = Cliente(**args)
 
         db.session.add(user)

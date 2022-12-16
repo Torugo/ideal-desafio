@@ -6,13 +6,13 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import default_exceptions
 from werkzeug.exceptions import HTTPException
+from flasgger import Swagger, swag_from
 
 import settings
 
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
-
 
 @app.errorhandler(Exception)
 def handle_error(e):
@@ -39,6 +39,11 @@ from flask_migrate import Migrate
 migrate = Migrate()
 migrate.init_app(app, db)
 
+app.config['SWAGGER'] = {
+    'title': 'Flasgger RESTful',
+    'uiversion': 2
+}
+swag = Swagger(app)
 
 from endpoints.clientes.resource import ClientsResource
 from endpoints.produtos.resource import ProdutosResource
