@@ -11,6 +11,8 @@ from app import db
 produto_fields = {
     "id": fields.Integer,
     "nome": fields.String,
+    "ativo": fields.Boolean,
+    "data_criacao": fields.DateTime,
 }
 
 
@@ -26,12 +28,44 @@ produto_post_parser.add_argument(
 
 class ProdutosResource(Resource):
     def get(self, id=None):
+        """
+        Retorna um dado produto quando fornecido seu produto_id 
+        ---
+        tags:
+          - Produto
+        parameters:
+          - in: path
+            name: produto_id
+            required: true
+            description: O id do produto, tente 1
+            type: string
+        responses:
+          200:
+            description: Informação do Produto
+            schema:
+              id: Produto
+              properties:
+                id:
+                  type: string
+                  default: 1
+                nome:
+                  type: string
+                  default: TRXF11
+                ativo:
+                    type: Bool
+                    default: True
+                data_criacao:
+                    type: Date
+                    default: 16/12/2022 12:56
+          404:
+            description: "Produto não encontrado"  
+        """
         if id:
             prod = Produto.query.filter_by(id=id).first()
             if prod:
                 return marshal(prod, produto_fields)
             else:
-                abort(404)
+                abort(404, message="Produto não encontrado")
 
     @marshal_with(produto_fields)
     def post(self):

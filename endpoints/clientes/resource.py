@@ -56,7 +56,7 @@ class ClientsResource(Resource):
           - in: path
             name: user_id
             required: true
-            description: The ID of the task, try 42!
+            description: O id do cliente, tente 1
             type: string
         responses:
           200:
@@ -82,6 +82,8 @@ class ClientsResource(Resource):
                 data_criacao:
                     type: Date
                     default: None
+          404:
+            description: "Cliente não encontrado"
         """
         try:
             if id:
@@ -89,7 +91,7 @@ class ClientsResource(Resource):
                 if user:
                     return marshal(user, user_fields)
                 else:
-                    abort(404, message="Usuário não encontrado")
+                    abort(404, message="Cliente não encontrado")
         except ProgrammingError:
             abort(500, message="Erro interno")
 
