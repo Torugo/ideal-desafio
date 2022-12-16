@@ -32,10 +32,10 @@ class ProdutosResource(Resource):
         Retorna um dado produto quando fornecido seu produto_id 
         ---
         tags:
-          - Produto
+          - Produtos
         parameters:
           - in: path
-            name: produto_id
+            name: id
             required: true
             description: O id do produto, tente 1
             type: string
@@ -69,6 +69,30 @@ class ProdutosResource(Resource):
 
     @marshal_with(produto_fields)
     def post(self):
+        """
+        Cadastra um novo produto
+        ---
+        tags:
+          - Produtos
+        parameters:
+          - in: body
+            name: body
+            schema:
+              id: produto_insert
+              properties:
+                nome: 
+                  type: string
+                  default: TRXF11
+        responses:
+          200:
+            description: Informação do produto
+            schema:
+              id: produto
+              properties:
+                nome:
+                  type: string
+                  default: TRXF11
+        """
         args = produto_post_parser.parse_args()
         args["ativo"] = True
         prod = Produto(**args)

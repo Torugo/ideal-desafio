@@ -54,7 +54,7 @@ class ClientsResource(Resource):
           - Clientes
         parameters:
           - in: path
-            name: user_id
+            name: id
             required: true
             description: O id do cliente, tente 1
             type: string
@@ -62,26 +62,26 @@ class ClientsResource(Resource):
           200:
             description: Informação do Cliente
             schema:
-              id: Cliente
+              id: cliente
               properties:
                 id:
                   type: string
-                  default: None
+                  default: 1
                 nome:
                   type: string
-                  default: None
+                  default: Stevie Harris
                 cpf:
                     type: int
-                    default: None
+                    default: 111111111111
                 dtNascimento:
                     type: Date
-                    default: None
+                    default: 10/10/10
                 ativo:
                     type: Bool
-                    default: None
+                    default: True
                 data_criacao:
                     type: Date
-                    default: None
+                    default: 16/12/2022 15:15
           404:
             description: "Cliente não encontrado"
         """
@@ -106,7 +106,7 @@ class ClientsResource(Resource):
           - in: body
             name: body
             schema:
-              id: cliente
+              id: cliente_insert
               properties:
                 nome: 
                   type: string
@@ -122,16 +122,6 @@ class ClientsResource(Resource):
             description: Informação do Cliente
             schema:
               id: cliente
-              properties:
-                nome:
-                  type: string
-                  default: Stevie Harris
-                cpf:
-                    type: int
-                    default: 111111111111
-                dtNascimento:
-                    type: Date
-                    default: 10/10/10
           400:
             description: "CPF já cadastrado"
         """
