@@ -32,4 +32,4 @@ Para a documentação das rotas, optou-se por utilizar o padrão swagger. Para c
 - Inclusão de testes: devido ao tempo de desenvolvimento do desafio, os testes não foram desenvolvidos.
 - Criação de rotas para alteração nos produtos cadastrados, diversos verbos disponiveis no protocolo http podem ser utilizados para a implementação dessas funcionalides.
 - Criar rotas com views para consultar dados de ordens feitas por um usuário, ordens feitas por produto e etc.
-
+- Utilizar mais um container com apache or nginx para hospedar a aplicação rest
