@@ -62,7 +62,7 @@ class ClientsResource(Resource):
           200:
             description: Informação do Cliente
             schema:
-              id: id
+              id: Cliente
               properties:
                 id:
                   type: string
@@ -121,9 +121,6 @@ class ClientsResource(Resource):
             schema:
               id: cliente
               properties:
-                id:
-                  type: string
-                  default: 1
                 nome:
                   type: string
                   default: Stevie Harris
@@ -133,12 +130,8 @@ class ClientsResource(Resource):
                 dtNascimento:
                     type: Date
                     default: 10/10/10
-                ativo:
-                    type: Bool
-                    default: True
-                data_criacao:
-                    type: Date
-                    default: 16/12/2022 12:07
+          400:
+            description: "CPF já cadastrado"
         """
         args = user_post_parser.parse_args()
         cpf = int(args['cpf'])

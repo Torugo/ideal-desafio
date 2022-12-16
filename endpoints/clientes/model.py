@@ -8,7 +8,7 @@ class Cliente(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     nome = db.Column(db.String(), nullable=False)
-    cpf = db.Column(db.Integer, nullable=False, unique=True)
+    cpf = db.Column(db.BigInteger, nullable=False, unique=True)
     dtNascimento = db.Column(db.DateTime, nullable=False)
     data_criacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     ativo = db.Column(db.Boolean, nullable=False)
