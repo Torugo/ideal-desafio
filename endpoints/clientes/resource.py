@@ -8,6 +8,7 @@ from flask_restful import reqparse
 from flask_restful import Resource
 from flask_restful import request
 from sqlalchemy.exc import ProgrammingError
+from validate_docbr import CPF
 
 from .model import Cliente
 from app import db
@@ -37,7 +38,7 @@ user_post_parser.add_argument(
 )
 user_post_parser.add_argument(
     "cpf",
-    type=int,
+    type=str,
     required=True,
     location=["json"],
     help="O parâmetro CPF é obrigatório",
@@ -83,10 +84,10 @@ class ClientsResource(Resource):
                   default: 1
                 nome:
                   type: string
-                  default: Stevie Harris
+                  default: Steve Harris
                 cpf:
-                    type: int
-                    default: 11111111111
+                    type: string
+                    default: 556.120.770-92
                 dtNascimento:
                     type: Date
                     default: 10/10/10
@@ -146,13 +147,13 @@ class ClientsResource(Resource):
               properties:
                 nome: 
                   type: string
-                  default: Stevie Harris
+                  default: Steve Harris
                 cpf:
-                    type: int
-                    default: 11111111111
+                  type: string
+                  default: 556.120.770-92
                 dtNascimento:
-                    type: Date
-                    default: 10/10/10
+                  type: Date
+                  default: 10/10/10
         responses:
           200:
             description: Informação do Cliente
@@ -162,17 +163,21 @@ class ClientsResource(Resource):
             description: "CPF já cadastrado"
         """
         args = user_post_parser.parse_args()
-        cpf = int(args['cpf'])
-
+        cpf = args['cpf']
         user = Cliente.query.filter_by(cpf=cpf).first()
         if user:
             abort(400, message= "CPF já cadastrado")
-        args["ativo"] = True
-        args["dtNascimento"] = datetime.strptime(args["dtNascimento"], "%d/%m/%y")
-        
-        user = Cliente(**args)
 
-        db.session.add(user)
-        db.session.commit()
+        cpf_validator = CPF()
+        if cpf_validator.validate(cpf) :
+          args["ativo"] = True
+          args["dtNascimento"] = datetime.strptime(args["dtNascimento"], "%d/%m/%y")
+          
+          user = Cliente(**args)
 
-        return user
+          db.session.add(user)
+          db.session.commit()
+
+          return user
+        else:
+          abort(400, message="CPF Inválido")
