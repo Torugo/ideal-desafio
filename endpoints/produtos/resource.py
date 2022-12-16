@@ -4,6 +4,7 @@ from flask_restful import marshal
 from flask_restful import marshal_with
 from flask_restful import reqparse
 from flask_restful import Resource
+from flask_restful import request
 
 from .model import Produto
 from app import db
@@ -12,7 +13,12 @@ produto_fields = {
     "id": fields.Integer,
     "nome": fields.String,
     "ativo": fields.Boolean,
-    "data_criacao": fields.DateTime,
+    "data_criacao": fields.String,
+}
+
+produto_list_fields = {
+    'count': fields.Integer,
+    'produtos': fields.List(fields.Nested(produto_fields)),
 }
 
 
@@ -36,9 +42,17 @@ class ProdutosResource(Resource):
         parameters:
           - in: path
             name: id
-            required: true
+            required: false
             description: O id do produto, tente 1
             type: string
+          - in: query
+            name: offset
+            type: integer
+            description: The number of items to skip before starting to collect the result set.
+          - in: query
+            name: limit
+            type: integer
+            description: The numbers of items to return.
         responses:
           200:
             description: Informação do Produto
@@ -66,6 +80,28 @@ class ProdutosResource(Resource):
                 return marshal(prod, produto_fields)
             else:
                 abort(404, message="Produto não encontrado")
+        else:
+            args = request.args.to_dict()
+            limit = args.get('limit', 0)
+            offset = args.get('offset', 0)
+
+            args.pop('limit', None)
+            args.pop('offset', None)
+
+            prod = Produto.query.filter_by(**args).order_by(Produto.id)
+            if limit:
+                prod = prod.limit(limit)
+
+            if offset:
+                prod = prod.offset(offset)
+
+            prod = prod.all()
+
+            return marshal({
+                'count': len(prod),
+                'produtos': [marshal(p, produto_fields) for p in prod]
+            }, produto_list_fields)
+
 
     @marshal_with(produto_fields)
     def post(self):
@@ -95,6 +131,12 @@ class ProdutosResource(Resource):
         """
         args = produto_post_parser.parse_args()
         args["ativo"] = True
+
+        nome = args['nome']
+        prod = Produto.query.filter_by(nome=nome).first()
+        if prod:
+            abort(400, message= "Nome do produto já cadastrado")
+
         prod = Produto(**args)
 
         db.session.add(prod)

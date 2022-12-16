@@ -23,7 +23,7 @@ user_fields = {
 
 user_list_fields = {
     'count': fields.Integer,
-    'users': fields.List(fields.Nested(user_fields)),
+    'clientes': fields.List(fields.Nested(user_fields)),
 }
 
 
@@ -125,7 +125,7 @@ class ClientsResource(Resource):
 
                 return marshal({
                     'count': len(user),
-                    'users': [marshal(u, user_fields) for u in user]
+                    'clientes': [marshal(u, user_fields) for u in user]
                 }, user_list_fields)
 
         except ProgrammingError:
