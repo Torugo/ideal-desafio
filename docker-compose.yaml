@@ -11,3 +11,31 @@ services:
       - '5432:5432'
     volumes:
       - ./db:/var/lib/postgresql/data
+    networks:
+      - ideal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  rest_api:
+    image: ideal_challenge
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    # command: python -m flask run --host=0.0.0.0 --port=5050
+    container_name: rest_api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ideal
+    ports:
+      - '5050:5050' 
+
+networks:
+  ideal:
+    driver: bridge
