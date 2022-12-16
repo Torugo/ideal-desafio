@@ -2,11 +2,11 @@
 
 Esse repositório foi criado para a reprodução do desafio descrito [nesse repositório](https://github.com/idealctvm-administrator/backend-challenge-node)
 
-Optou-se por desenvolver a solução utilizando a linguagem Pytyhon, bem como a biblioteca [flask-restful](https://flask-restful.readthedocs.io/en/latest/)
+Optou-se por desenvolver a solução utilizando a linguagem Python, junto com a biblioteca [flask-restful](https://flask-restful.readthedocs.io/en/latest/)
 
 ## Instruções de execução
 
-A aplicação encontra se estruturada em dois containers Docker:
+A aplicação está estruturada em dois containers Docker:
 
 - Banco de dados PostgreSQL 14
 - Aplicação Python/Flask
