@@ -16,11 +16,12 @@ ordem_fields = {
     "idProduto": fields.Integer,
     "valorCompra": fields.Float,
     "qtdCompra": fields.Integer,
+    "totalCompra": fields.Float,
 }
 
 ordem_list_fields = {
     'count': fields.Integer,
-    'Ordems': fields.List(fields.Nested(ordem_fields)),
+    'Ordens': fields.List(fields.Nested(ordem_fields)),
 }
 
 order_post_parser = reqparse.RequestParser()
@@ -64,13 +65,21 @@ class OrdemResource(Resource):
         Retorna um dado produto quando fornecido seu produto_id 
         ---
         tags:
-          - Ordems
+          - Ordens
         parameters:
           - in: path
             name: id
-            required: true
+            required: false
             description: O id da ordem, tente 1
             type: string
+          - in: query
+            name: offset
+            type: integer
+            description: The number of items to skip before starting to collect the result set.
+          - in: query
+            name: limit
+            type: integer
+            description: The numbers of items to return.
         responses:
           200:
             description: Informação da Ordem
@@ -92,9 +101,11 @@ class OrdemResource(Resource):
                 valorCompra:
                     type: float
                     default: 10.50
-
+                totalCompra:
+                    type: float
+                    default: 105.0
           404:
-            description: "Ordem não encontrado"  
+            description: "Ordem não encontrada"  
         """
         if id:
             order = Ordem.query.filter_by(id=id).first()
@@ -112,31 +123,69 @@ class OrdemResource(Resource):
             args.pop('limit', None)
             args.pop('offset', None)
 
-            ordem = Ordem.query.filter_by(**args).order_by(Ordem.id)
+            ordens = Ordem.query.filter_by(**args).order_by(Ordem.id)
             if limit:
-                ordem = ordem.limit(limit)
+                ordens = ordens.limit(limit)
 
             if offset:
-                ordem = ordem.offset(offset)
+                ordens = ordens.offset(offset)
 
-            ordem = ordem.all()
+            ordens = ordens.all()
 
+            ordens_response = []
+            for ordem in ordens:
+                ordem.valorCompra = ordem.valorCompra / 100  # avoiding mantissa errors
+                ordem.totalCompra = ordem.totalCompra / 100
+                ordens_response.append(marshal(ordem, ordem_fields))
             return marshal({
-                'count': len(ordem),
-                'ordens': [marshal(o, ordem_fields) for o in ordem]
+                'count': len(ordens),
+                'Ordens': ordens_response
             }, ordem_list_fields)
 
     @marshal_with(ordem_fields)
     def post(self):
+        """
+        Cadastra uma nova ordem
+        ---
+        tags:
+          - Ordens
+        parameters:
+          - in: body
+            name: body
+            schema:
+              id: Ordem_insert
+              properties:
+                id:
+                  type: string
+                  default: 1
+                idCliente:
+                  type: int
+                  default: 1
+                idProduto:
+                    type: int
+                    default: 1
+                qtdCompra:
+                    type: int
+                    default: 10
+                valorCompra:
+                    type: float
+                    default: 10.50
+        responses:
+          200:
+            description: Informação da ordem cadastrada
+            schema:
+              id: Ordem
+        """
+
         args = order_post_parser.parse_args()
         args["valorCompra"] = args["valorCompra"] * 100  # avoiding mantissa errors
         args["totalCompra"] = args["valorCompra"] * args["qtdCompra"]
-        order = Ordem(**args)
+        ordem = Ordem(**args)
 
-        db.session.add(order)
+        db.session.add(ordem)
         db.session.commit()
 
-        order.valorCompra = order.valorCompra / 100  # avoiding mantissa errors
-        order.totalCompra = order.totalCompra / 100
+        ordem.valorCompra = ordem.valorCompra / 100  # avoiding mantissa errors
+        ordem.totalCompra = ordem.totalCompra / 100
 
-        return order
+        return ordem

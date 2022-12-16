@@ -51,7 +51,7 @@ from endpoints.ordem.resource import OrdemResource
 
 api.add_resource(ClientsResource, "/clientes", "/clientes/<int:id>")
 api.add_resource(ProdutosResource, "/produtos", "/produtos/<int:id>")
-api.add_resource(OrdemResource, "/ordems", "/ordems/<int:id>")
+api.add_resource(OrdemResource, "/ordens", "/ordens/<int:id>")
 
 
 if __name__ == "__main__":
