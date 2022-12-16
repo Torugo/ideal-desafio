@@ -6,6 +6,7 @@ from flask_restful import marshal
 from flask_restful import marshal_with
 from flask_restful import reqparse
 from flask_restful import Resource
+from flask_restful import request
 from sqlalchemy.exc import ProgrammingError
 
 from .model import Cliente
@@ -15,9 +16,14 @@ user_fields = {
     "id": fields.Integer,
     "nome": fields.String,
     "cpf": fields.String,
-    "dtNascimento": fields.DateTime,
+    "dtNascimento": fields.String,
     "ativo": fields.Boolean,
-    "data_criacao": fields.DateTime,
+    "data_criacao": fields.String,
+}
+
+user_list_fields = {
+    'count': fields.Integer,
+    'users': fields.List(fields.Nested(user_fields)),
 }
 
 
@@ -48,16 +54,24 @@ user_post_parser.add_argument(
 class ClientsResource(Resource):
     def get(self, id=None):
         """
-        Retorna um dado cliente quando fornecido seu cliente_id 
+        Retorna um dado cliente quando fornecido seu cliente_id, caso contrario retorna todos clientes
         ---
         tags:
           - Clientes
         parameters:
           - in: path
             name: id
-            required: true
+            required: false
             description: O id do cliente, tente 1
             type: string
+          - in: query
+            name: offset
+            type: integer
+            description: The number of items to skip before starting to collect the result set.
+          - in: query
+            name: limit
+            type: integer
+            description: The numbers of items to return.
         responses:
           200:
             description: Informação do Cliente
@@ -72,7 +86,7 @@ class ClientsResource(Resource):
                   default: Stevie Harris
                 cpf:
                     type: int
-                    default: 111111111111
+                    default: 11111111111
                 dtNascimento:
                     type: Date
                     default: 10/10/10
@@ -92,6 +106,28 @@ class ClientsResource(Resource):
                     return marshal(user, user_fields)
                 else:
                     abort(404, message="Cliente não encontrado")
+            else:
+                args = request.args.to_dict()
+                limit = args.get('limit', 0)
+                offset = args.get('offset', 0)
+
+                args.pop('limit', None)
+                args.pop('offset', None)
+
+                user = Cliente.query.filter_by(**args).order_by(Cliente.id)
+                if limit:
+                    user = user.limit(limit)
+
+                if offset:
+                    user = user.offset(offset)
+
+                user = user.all()
+
+                return marshal({
+                    'count': len(user),
+                    'users': [marshal(u, user_fields) for u in user]
+                }, user_list_fields)
+
         except ProgrammingError:
             abort(500, message="Erro interno")
 
@@ -113,7 +149,7 @@ class ClientsResource(Resource):
                   default: Stevie Harris
                 cpf:
                     type: int
-                    default: 111111111111
+                    default: 11111111111
                 dtNascimento:
                     type: Date
                     default: 10/10/10
